@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>license_motion_raw_capture_April2020 &#8212; License Plate Number Recognition project  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for license_motion_raw_capture_April2020</h1><div class="highlight"><pre>
+<span></span><span class="c1">#Python Standard libraries</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt</span>
+<span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlopen</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">t</span>
+
+<span class="c1">#3rd-party libraries</span>
+<span class="c1">#from gpiozero import MotionSensor</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">mysql.connector</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Local libraries/application</span>
+<span class="c1">#None</span>
+
+
+<div class="viewcode-block" id="detect_license_plate"><a class="viewcode-back" href="../license_motion_raw_capture_April2020.html#license_motion_raw_capture_April2020.detect_license_plate">[docs]</a><span class="k">def</span> <span class="nf">detect_license_plate</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;This function includes the detection of the license plate.    </span>
+<span class="sd">        </span>
+<span class="sd">    Credits go to `OpenAlpr &lt;openalpr.com&gt;`_.</span>
+<span class="sd">    </span>
+<span class="sd">    The return values are the 3 strings plate, confidence and date.</span>
+<span class="sd">    These 3 strings are saved in the MySQL database &#39;plates&#39;, in the host=&#39;localhost&#39;, port=&#39;3306&#39;.       </span>
+<span class="sd">        </span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="n">t</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="c1">#subprocess module calls a linux terminal command and gets and output (see references 6, 7)</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;alpr&#39;</span><span class="p">,</span> <span class="s1">&#39;-c eu&#39;</span><span class="p">,</span> <span class="s1">&#39;-p cz&#39;</span><span class="p">,</span> <span class="s1">&#39;-n 3&#39;</span><span class="p">,</span><span class="s1">&#39;-j&#39;</span><span class="p">,</span>\
+                              <span class="s1">&#39;/home/pi/projects/license-plate-detection/slanina/to_detect_from.jpg&#39;</span><span class="p">],</span>\
+                             <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#print(process.stdout,file=output_to_database)</span>
+    <span class="n">current_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>   
+    <span class="c1">#takes output of subprocess and saves it</span>
+    <span class="n">diccionario</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+    <span class="c1">#transforms subprocess output into json format (see reference 8)</span>
+    <span class="n">diccionario</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">diccionario</span><span class="p">)</span>
+    <span class="c1">#get result of the &#39;results&#39; key</span>
+    <span class="c1">#if empty, no plates detected        </span>
+    <span class="k">if</span> <span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">]</span><span class="o">==</span><span class="p">[]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No plates detected&#39;</span><span class="p">)</span>
+    <span class="c1">#if populated, print plate number and detection confidence</span>
+    <span class="k">elif</span> <span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">]</span><span class="o">!=</span><span class="p">[]:</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#for debugging purposes            </span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;plate&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;confidence&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">current_date</span><span class="p">)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="n">plate</span> <span class="o">=</span> <span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;plate&#39;</span><span class="p">]</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">diccionario</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span>
+        <span class="c1">#insert info into database</span>
+        <span class="n">connect_to_database</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pi&#39;</span><span class="p">,</span>
+                                                      <span class="n">database</span><span class="o">=</span><span class="s1">&#39;plates&#39;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;3306&#39;</span><span class="p">)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#for debugging purposes</span>
+        <span class="c1">#print(connect_to_database)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">connect_to_database</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#for debugging purposes </span>
+        <span class="c1">#print(cursor)            </span>
+        <span class="c1">#print(number)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#the format of the data for inserting it to database</span>
+        <span class="n">add_plate_info</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;INSERT INTO license_plates_detected &quot;</span>
+          <span class="s2">&quot;(Plates, Confidence, Date) &quot;</span>
+          <span class="s2">&quot;VALUES (</span><span class="si">%(Plates)s</span><span class="s2">, </span><span class="si">%(Confidence)s</span><span class="s2">, </span><span class="si">%(Date)s</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#for debugging purposes</span>
+        <span class="c1">#print(add_plate_info)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#the data to be inserted to database</span>
+        <span class="n">data_plate_info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Plates&#39;</span><span class="p">:</span> <span class="n">plate</span><span class="p">,</span>
+            <span class="s1">&#39;Confidence&#39;</span><span class="p">:</span> <span class="n">confidence</span><span class="p">,</span>
+            <span class="s1">&#39;Date&#39;</span><span class="p">:</span> <span class="n">current_date</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#for debugging purposes</span>
+        <span class="c1">#print(data_plate_info)</span>
+        <span class="c1">#-----------------------------------------------------------------</span>
+        <span class="c1">#Insert the data</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_plate_info</span><span class="p">,</span> <span class="n">data_plate_info</span><span class="p">)</span>
+        <span class="c1">#Commit the insertion</span>
+        <span class="n">connect_to_database</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="c1">#Close cursor</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1">#close database</span>
+        <span class="n">connect_to_database</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> </div>
+    
+<div class="viewcode-block" id="get_stream_from_localhost"><a class="viewcode-back" href="../license_motion_raw_capture_April2020.html#license_motion_raw_capture_April2020.get_stream_from_localhost">[docs]</a><span class="k">def</span> <span class="nf">get_stream_from_localhost</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;The get_stream_from_localhost() function gets the bytes from the stream</span>
+<span class="sd">    generated by the Motion-project.</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="s1">&#39;http://localhost:8081/&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">bytess</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+    <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">bytess</span> <span class="o">+=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">bytess</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xff\xd8</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">bytess</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xff\xd9</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This is a:&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s1">&#39; and this is b:&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>            
+            <span class="k">break</span>
+    <span class="n">list_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">bytess</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">list_values</span></div>
+   
+<div class="viewcode-block" id="print_stream_variables"><a class="viewcode-back" href="../license_motion_raw_capture_April2020.html#license_motion_raw_capture_April2020.print_stream_variables">[docs]</a><span class="k">def</span> <span class="nf">print_stream_variables</span><span class="p">(</span><span class="n">passed_list</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;The function gets the detection variables from the stream so they image can be decoded.</span>
+<span class="sd">       </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">passed_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#local variable to this function</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">passed_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#local variable to this function</span>
+    <span class="n">byte_list</span> <span class="o">=</span> <span class="n">passed_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1">#local variable to this function</span>
+    <span class="n">jpg</span> <span class="o">=</span> <span class="n">byte_list</span><span class="p">[</span><span class="n">a1</span><span class="p">:</span><span class="n">b1</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="c1">#local variable to this function    </span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imdecode</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">jpg</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_GRAYSCALE</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="s1">&#39;to_detect_from.jpg&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span></div>
+<span class="c1">#    cv2.imshow(&#39;i&#39;, i)</span>
+<span class="c1">#    if cv2.waitKey(1)==27:</span>
+<span class="c1">#        exit(0)</span>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../license_motion_raw_capture_April2020.html#license_motion_raw_capture_April2020.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;The main() function organizes all the other functions in the correct</span>
+<span class="sd">    execution order and measures the time elapsed by the image creation and</span>
+<span class="sd">    the image processing.       </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>  
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">start_time_total</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">returned_list</span> <span class="o">=</span> <span class="n">get_stream_from_localhost</span><span class="p">()</span>    
+    <span class="n">print_stream_variables</span><span class="p">(</span><span class="n">returned_list</span><span class="p">)</span>
+    <span class="n">stop_time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">dtt</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The time to get the image from the stream is&#39;</span><span class="p">,</span> <span class="n">dtt</span><span class="p">)</span>    
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">detect_license_plate</span><span class="p">()</span>
+    <span class="n">stop_time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">dtt</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The detection time is&#39;</span><span class="p">,</span> <span class="n">dtt</span><span class="p">)</span>
+    <span class="n">stop_time_total</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">dtt_total</span> <span class="o">=</span> <span class="n">stop_time_total</span> <span class="o">-</span> <span class="n">start_time_total</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The total script time is&#39;</span><span class="p">,</span> <span class="n">dtt_total</span><span class="p">)</span></div>
+    
+
+<span class="c1">#live streaming from Motion, framerate 2 FPS</span>
+<span class="c1">#------------------------------------------------------------------------</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">main</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ConnectionError</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;error_log.log&#39;</span><span class="p">,</span> <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">exception_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">ConnectionError</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;1.Unable to get live feed. Verify the Motion project feed and connection.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;2.Try entering &quot;sudo service motion start&quot;.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;3.In the terminal enter &quot;sudo nano /etc/motion/motion.conf&quot;, for the configuration file.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;4.For local host video feed aim to: &quot;http://localhost:8081/&quot;.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">exception_date</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    
+<span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>    
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;error_log.log&#39;</span><span class="p">,</span> <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">exception_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">OSError:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;1.Unable to get live feed. Verify the Motion project feed and connection.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;2.Try entering &quot;sudo service motion start&quot;.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;3.In the terminal enter &quot;sudo nano /etc/motion/motion.conf&quot;, for the configuration file.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;4.For local host video feed aim to: &quot;http://localhost:8081/&quot;.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;5.Verify OpenAlpr detection function and/or service in terminal.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">exception_date</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+                
+<span class="c1">#------------------------------------------------------------------------</span>
+           
+            
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+<span class="sd">References:</span>
+<span class="sd">1.`https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html`_</span>
+<span class="sd">2.`https://picamera.readthedocs.io/en/release-1.13/recipes2.html`_</span>
+<span class="sd">3.`http://doc.openalpr.com/accuracy_improvements.html`_</span>
+<span class="sd">4.`https://www.pyimagesearch.com/2018/09/17/opencv-ocr-and-text-recognition-with-tesseract/`_</span>
+<span class="sd">5.`https://gpiozero.readthedocs.io/_/downloads/en/stable/pdf/`_</span>
+<span class="sd">6.`https://docs.python.org/3/library/subprocess.html`_</span>
+<span class="sd">7.`https://www.youtube.com/watch?v=2Fp1N6dof0Y`_</span>
+<span class="sd">8.`https://docs.python.org/3/library/json.html`_</span>
+<span class="sd">9.`https://dev.mysql.com/doc/connector-python/en/connector-python-connectargs.html`_</span>
+<span class="sd">10.`https://github.com/openalpr/openalpr/wiki/OpenALPR-Design`_</span>
+<span class="sd">11.`https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/`_</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">License Plate Number Recognition project</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../license_motion_raw_capture_April2020.html">license_motion_raw_capture_April2020 module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
