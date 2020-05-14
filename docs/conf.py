@@ -12,14 +12,14 @@
 #
 import os
 import sys
-sys.path.insert(0, '/home/pi/.virtualenvs/lp/t_license_plate_number_recognition_project')
+sys.path.insert(0, '/home/pi/.virtualenvs/lp/License Plate Number Recognition')
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'License Plate Number Recognition project'
-copyright = '2020, Author'
-author = 'Freddy Baez'
+project = 'License Plate Number Recognition'
+copyright = '2020, BAE0012'
+author = 'Freddy Baez BAE0012'
 
 
 # -- General configuration ---------------------------------------------------
@@ -54,7 +54,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinxdoc'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
