@@ -1,5 +1,7 @@
-**license-plate-detection-raspberry-pi-3B-plus-OpenAlpr**
+**License plate number recognition using Raspberry-Pi 3B plus OpenAlpr**
+
 The aim is to make the code do the following: 
+
 - Function 1: Take images from the live video feed. The live video feed comes from the localhost using the Motion project (https://motion-project.github.io/). 
 - Function 2: An image from the live video feed in Function 1 is sent to function 2. Function 2 calls the license plate detection on Function 3. 
 - Function 3: This calls OpenAlpr to detect if there is a license plate in the image from Function 2. If there is a license plate the information is saved into a MariaDB local database.
@@ -8,7 +10,7 @@ The aim is to make the code do the following:
 
 For this installation tutorial, it is assumed that the Raspbian is install in the Raspberry Pi 3B.
 
-**Installation (Vinczejanos, 2017) (MMattiii, 2019)**
+**Installation, credits to: ([Vinczejanos, 2017](https://blog.vinczejanos.info/2017/05/01/install-openalpr-on-raspberry-pi-3-part-2/)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
 
 In case, the memory is limited in the Raspberry Pi, run the following commands to uninstall LibreOffice and Wolfram which will not be used.
 ```
@@ -76,4 +78,55 @@ sudo ldconfig
 To test if it Tesseract was installed correctly, type the following command. This will output the installed version.
 ```
 tesseract -v
+```
+The last dependency is OpenCV. It may stop during the installation process.
+```
+cd /usr/src
+sudo wget https://github.com/opencv/opencv/archive/4.2.0.zip
+sudo mv 4.2.0.zip OpenCV-4.2.0.zip
+sudo unzip -q OpenCV-4.2.0.zip
+cd opencv-4.2.0
+sudo mkdir release
+cd cmake
+cd release
+sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D ENABLE_PRECOMPILED_HEADERS=OFF ..
+sudo make -j2
+sudo make install
+```
+After installing all dependencies, you can finally install OpenALPR itself:
+```
+cd /usr/src
+sudo git clone https://github.com/openalpr/openalpr.git
+cd openalpr/src
+sudo mkdir build
+cd build
+sudo cmake -D CMAKE_INSTALL_PREFIX:PATH=/usr -D CMAKE_INSTALL_SYSCONFDIR:PATH=/etc ..
+sudo make -j2
+sudo make install
+sudo ldconfig
+```
+To test if OpenALPR is working, you can download one of their licence plate pictures and run the licence plate recognition command:
+```
+cd ~
+wget http://plates.openalpr.com/h786poj.jpg -O lp.jpg
+alpr lp.jpg
+```
+Note: In case, you had installed the OpenCV-2.4.13, like in other tutorials, modifications need to be made for installing OpenCV after unzipping the OpenCV-2.4.13 folder:
+```
+sudo nano OpenCVDetectCXXCompiler.cmake
+```
+Then, copy and paste the following code into the file before the first “if (NOT...”. This means, when you find that if NOT, just before it, press return to give some spaces to the following code, then copy and paste:
+```
+#dumpversion prints only major version since gcc7
+  if((NOT CMAKE_GCC_REGEX_VERSION) AND (${CMAKE_OPENCV_GCC_VERSION_FULL} GREATER 6))
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpfullversion
+                  OUTPUT_VARIABLE CMAKE_OPENCV_GCC_VERSION_FULL
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" CMAKE_GCC_REGEX_VERSION "${CMAKE_OPENCV_GCC_VERSION_FULL}")
+  endif()
+```
+Then:
+```
+Ctrl+X in nano and press Enter to save the changes.
+cd ..
 ```
