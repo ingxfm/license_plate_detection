@@ -130,3 +130,15 @@ Then:
 Ctrl+X in nano and press Enter to save the changes.
 cd ..
 ```
+**Set cron job to clean /var/lib/motion files**
+In this example we will use the motion detection built in the Motion-project software. Every time a motion is detected, Motion will capture a .jpg and save it in /var/lib/motion. When the file is created, this event will trigger the Python license plate number detection script. After a while this folder may be full. We will set a cron job to clean the folder every hour.
+
+For that purpose, go the terminal and type
+```
+crontab -e
+```
+Use your preferred editor (nano, vim, etc). We used nano to add the following command to crontab. This includes the ./path_to_our_cleaning_script.sh.
+```
+0 * * * * ./path_to_our_cleaning_script.sh
+```
+This script includes commands to clear to directory of .jpg files every 0 minute of every hour, every day of every month.
