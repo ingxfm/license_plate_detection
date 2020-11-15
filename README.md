@@ -135,10 +135,10 @@ In this example we will use the motion detection built in the Motion-project sof
 
 For that purpose, go the terminal and type
 ```
-crontab -e
+sudo crontab -e
 ```
 Use your preferred editor (nano, vim, etc). We used nano to add the following command to crontab. This includes the ./path_to_our_cleaning_script.sh.
 ```
-0 * * * * sudo ./path_to_our_cleaning_script.sh
+0 * * * * ./path_to_our_cleaning_script.sh
 ```
 This script includes commands to clear to directory of .jpg files every 0 minute of every hour, every day of every month.
