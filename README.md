@@ -142,3 +142,13 @@ Use your preferred editor (nano, vim, etc). We used nano to add the following co
 0 * * * * ./path_to_our_cleaning_script.sh
 ```
 This script includes commands to clear to directory of .jpg files every 0 minute of every hour, every day of every month.
+
+Last, on your Pi, edit the file /etc/rc.local using the editor of your choice. You must edit with root, for example:
+```
+sudo nano /etc/rc.local
+```
+Add commands just before the line exit 0 at the end, then save the file and exit ([Raspberri Pi web, 2019](https://www.raspberrypi.org/documentation/linux/usage/rc-local.md)).
+```
+python3 /home/pi/myscript.py &
+```
+Do not forget the "&" symbol. This ensures the script will run in the background allowing the Pi continue the rest of the booting process.
