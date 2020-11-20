@@ -154,6 +154,7 @@ python3 /home/pi/myscript.py &
 Do not forget the "&" symbol. This ensures the script will run in the background allowing the Pi continue the rest of the booting process.
 
 **Update paths in the scripts**
+
 In the script start_lpnr_from_boot.py, in line 3: change this path to where you located this.
 In the script monitoring_vlm_calling_lpnr.sh: do Not change path.
 In the script lpnr.py, in line 29: change this path to where you located this.
