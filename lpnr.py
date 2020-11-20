@@ -26,7 +26,7 @@ def detect_license_plate():
     
     #subprocess module calls a linux terminal command and gets and output (see references 6, 7)
     process = subprocess.run(['alpr', '-c eu', '-p cz', '-n 3','-j',\
-                              '/home/pi/projects/license-plate-detection/slanina/to_detect_from.jpg'],\
+                              '/path/to/repository/to_detect_from.jpg'],\
                              stdout=subprocess.PIPE, text=True)
     #print(process.stdout,file=output_to_database)
     current_date = dt.now()   
