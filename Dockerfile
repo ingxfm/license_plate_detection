@@ -19,17 +19,17 @@ RUN cd /tmp/ && tar xvf leptonica-1.76.0.tar.gz --no-same-owner && cd leptonica-
     make -j2 && \
     make install
 
-#RUN cd /usr/src && git clone https://github.com/tesseract-ocr/tesseract.git && \
-#    cd tesseract && git checkout 3.04.01 && ./autogen.sh && ./configure --enable-debug && make -j2 && make install && ldconfig
+RUN cd /usr/src && git clone https://github.com/tesseract-ocr/tesseract.git && \
+    cd tesseract && git checkout 3.04.01 && ./autogen.sh && ./configure --enable-debug && make -j2 && make install && ldconfig
 
-#RUN wget https://github.com/opencv/opencv/archive/4.2.0.zip -O /tmp/OpenCV-4.2.0.zip && cd /usr/src/ && unzip -q /tmp/OpenCV-4.2.0.zip && \
-#    cd opencv-4.2.0 && mkdir build && cd build \
-#    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D ENABLE_PRECOMPILED_HEADERS=OFF .. && \
-#    make -j2 && make install
+RUN wget https://github.com/opencv/opencv/archive/4.2.0.zip -O /tmp/OpenCV-4.2.0.zip && cd /usr/src/ && unzip -q /tmp/OpenCV-4.2.0.zip && \
+    cd opencv-4.2.0 && mkdir build && cd build \
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D ENABLE_PRECOMPILED_HEADERS=OFF .. && \
+    make -j2 && make install
 
-#RUN git clone https://github.com/openalpr/openalpr.git /usr/src/openalpr && mkdir /usr/src/openalpr/build && cd /usr/src/openalpr/build && \
-#    cmake -D CMAKE_INSTALL_PREFIX:PATH=/usr -D CMAKE_INSTALL_SYSCONFDIR:PATH=/etc ../src && \
-#    make -j2 &&  make install && ldconfig
+RUN git clone https://github.com/openalpr/openalpr.git /usr/src/openalpr && mkdir /usr/src/openalpr/build && cd /usr/src/openalpr/build && \
+    cmake -D CMAKE_INSTALL_PREFIX:PATH=/usr -D CMAKE_INSTALL_SYSCONFDIR:PATH=/etc ../src && \
+    make -j2 &&  make install && ldconfig
 
 RUN pip3 install --upgrade pip && pip3 install opencv-python
 
