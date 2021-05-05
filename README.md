@@ -8,9 +8,9 @@ The aim is to make the code do the following:
 
 **Dependency installation process for Raspberry Pi 3B with Buster**
 
-For this installation tutorial, it is assumed that the Raspbian is install in the Raspberry Pi 3B.
+For this installation tutorial, it is assumed that the Raspbian is installed in the Raspberry Pi 3B.
 
-**Installation, credits to: ([Vinczejanos, 2017](https://blog.vinczejanos.info/2017/05/01/install-openalpr-on-raspberry-pi-3-part-2/)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
+**Installation credits to: ([Vinczejanos, 2017](https://blog.vinczejanos.info/2017/05/01/install-openalpr-on-raspberry-pi-3-part-2/)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
 
 In case, the memory is limited in the Raspberry Pi, run the following commands to uninstall LibreOffice and Wolfram which will not be used.
 ```
@@ -22,7 +22,7 @@ Update your Pi with the following two commands:
 sudo apt-get update
 sudo apt-get upgrade
 ```
-The next command installs packages needed for all the other steps:
+The next command installs packages required for all the other steps:
 ```
 sudo apt-get install autoconf automake libtool libleptonica-dev libicu-dev libpango1.0-dev libcairo2-dev cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev virtualenvwrapper liblog4cplus-dev libcurl4-openssl-dev libtiff5-dev gcc make ca-certificates autoconf-archive libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 ```
