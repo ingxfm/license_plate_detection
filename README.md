@@ -86,8 +86,8 @@ sudo wget https://github.com/opencv/opencv/archive/4.2.0.zip
 sudo mv 4.2.0.zip OpenCV-4.2.0.zip
 sudo unzip -q OpenCV-4.2.0.zip
 cd opencv-4.2.0
-sudo mkdir release
 cd cmake
+sudo mkdir release
 cd release
 sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D ENABLE_PRECOMPILED_HEADERS=OFF ..
 sudo make -j2
