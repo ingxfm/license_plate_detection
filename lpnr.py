@@ -97,7 +97,8 @@ def get_stream_from_localhost():
     '''
     stream = urlopen('http://localhost:8081/', data=None)
     bytess = b''
-    while(1):
+    LOOPING = 1
+    while LOOPING:
         bytess += stream.read(1024)
         a = bytess.find(b'\xff\xd8')
         b = bytess.find(b'\xff\xd9')
