@@ -10,7 +10,7 @@ The aim is to make the code do the following:
 
 For this installation tutorial, it is assumed that the Raspbian is installed in the Raspberry Pi 3B.
 
-**Installation credits to: ([Vinczejanos, 2017](https://blog.vinczejanos.info/2017/05/01/install-openalpr-on-raspberry-pi-3-part-2/)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
+**Installation credits to: ([Vinczejanos, 2017](https://readthedocs.vinczejanos.info/Old_Blog_Contents/raspberry/Install_Openalpr_On_Raspberry_Pi_3_part_2/?h=install+ope)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
 
 In case the memory is limited in the Raspberry Pi, run the following commands to uninstall LibreOffice and Wolfram which will not be used.
 ```
