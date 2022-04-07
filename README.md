@@ -12,7 +12,7 @@ For this installation tutorial, it is assumed that the Raspbian is installed in 
 
 **Installation credits to: ([Vinczejanos, 2017](https://blog.vinczejanos.info/2017/05/01/install-openalpr-on-raspberry-pi-3-part-2/)) ([MMattiii, 2019](https://www.reddit.com/r/raspberry_pi/comments/baxwz5/how_to_install_openalpr_on_raspberry_pi/))**
 
-In case, the memory is limited in the Raspberry Pi, run the following commands to uninstall LibreOffice and Wolfram which will not be used.
+In case the memory is limited in the Raspberry Pi, run the following commands to uninstall LibreOffice and Wolfram which will not be used.
 ```
 sudo apt-get purge wolfram-engine libreoffice* scratch -y
 sudo apt-get clean & autoremove
@@ -131,9 +131,9 @@ cd ..
 ```
 **Set cron job to clean /var/lib/motion files**
 
-In this example we will use the motion detection built in the Motion-project software. Every time a motion is detected, Motion will capture a .jpg and save it in /var/lib/motion. When the file is created, this event will trigger the Python license plate number detection script. After a while this folder may be full. We will set a cron job to clean the folder every hour.
+In this example, we will use the motion detection built in the Motion-project software. Every time a movement is detected, Motion will capture a .jpg and save it in /var/lib/motion. When the file is created, this event will trigger the Python license plate number detection script. After a while this folder may be full. We will set a cron job to clean the folder every hour.
 
-For that purpose, go the terminal and type
+For that purpose, go the terminal and type:
 ```
 sudo crontab -e
 ```
@@ -143,7 +143,7 @@ Use your preferred editor (nano, vim, etc). We used nano to add the following co
 ```
 This script includes commands to clear to directory of .jpg files every 0 minute of every hour, every day of every month.
 
-Last, on your Pi, edit the file /etc/rc.local using the editor of your choice. You must edit with root, for example:
+Last, on your Pi, edit the file /etc/rc.local using the editor of your choice. You must edit with root. For example:
 ```
 sudo nano /etc/rc.local
 ```
