@@ -35,7 +35,7 @@ sudo apt-get install -y openjdk-8-jdk
 sudo apt-get install -y default-jdk
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ```
-Then:
+After:
 ```
 sudo apt install libgtk-3-dev
 ```
