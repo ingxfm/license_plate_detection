@@ -87,7 +87,8 @@ def detect_license_plate():
         cursor.close()
         #close database
         connect_to_database.close() 
-    
+
+        
 def get_stream_from_localhost():
     '''
     This function connects to the video stream and fetch the bytes from that stream. The return
@@ -107,7 +108,8 @@ def get_stream_from_localhost():
             break
     list_values = [a, b, bytess]
     return list_values
-   
+
+
 def print_stream_variables(passed_list):
     '''
     This function functions takes the passed list from the function get_stream_from_localhost().
@@ -125,6 +127,7 @@ def print_stream_variables(passed_list):
 #    cv2.imshow('i', i)
 #    if cv2.waitKey(1)==27:
 #        exit(0)
+
 
 def main():
     '''
