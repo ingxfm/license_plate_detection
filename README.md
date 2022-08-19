@@ -4,7 +4,7 @@ The aim is to make the code do the following:
 
 - Function 1: Take images from the live video feed. The live video feed comes from the localhost using the Motion project (https://motion-project.github.io/). 
 - Function 2: An image from the live video feed in Function 1 is sent to function 2. Function 2 calls the license plate detection on Function 3. 
-- Function 3: This calls OpenAlpr to detect if there is a license plate in the image from Function 2. If there is a license plate the information is saved into a MariaDB local database.
+- Function 3: This calls OpenAlpr to detect if there is a license plate in the image from Function 2. If there is a license plate, then, the information is saved into a MariaDB local database.
 
 **Dependency installation process for Raspberry Pi 3B with Buster**
 
@@ -26,7 +26,7 @@ The next command installs packages required for all the other steps:
 ```
 sudo apt-get install autoconf automake libtool libleptonica-dev libicu-dev libpango1.0-dev libcairo2-dev cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev virtualenvwrapper liblog4cplus-dev libcurl4-openssl-dev libtiff5-dev gcc make ca-certificates autoconf-archive libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 ```
-In some cases, the command above can throw errors in libpng12-dev, in such a case run separately the command:
+In some cases, the command above can throw errors in libpng12-dev, in such a case, run separately the command:
 sudo apt-get install libpng12-dev
 
 Then:
@@ -52,7 +52,7 @@ cd /usr/include/linux
 sudo mv videodev.h. videodev.h
 ```
 The following commands will download, make and install Leptonica. Leptonica is one of the dependencies of OpenALPR.
-The making process takes some time. To speed things a little up the -j2 is added.
+The making process takes some time. To speed things a little up, the argument -j2 is added.
 ```
 cd /usr/src
 sudo wget http://www.leptonica.org/source/leptonica-1.76.0.tar.gz
@@ -75,7 +75,7 @@ sudo make -j2
 sudo make install
 sudo ldconfig
 ```
-To test if it Tesseract was installed correctly, type the following command. This will output the installed version.
+To test if Tesseract was installed correctly, type the following command. This will output the installed version.
 ```
 tesseract -v
 ```
@@ -133,7 +133,7 @@ cd ..
 
 In this example, we will use the motion detection built in the Motion-project software. Every time a movement is detected, Motion will capture a .jpg and save it in /var/lib/motion. When the file is created, this event will trigger the Python license plate number detection script. After a while this folder may be full. We will set a cron job to clean the folder every hour.
 
-For that purpose, go the terminal and type:
+For that purpose, go to the terminal and type:
 ```
 sudo crontab -e
 ```
@@ -151,7 +151,7 @@ Add commands just before the line exit 0 at the end, then save the file and exit
 ```
 python3 /home/pi/myscript.py &
 ```
-Do not forget the "&" symbol. This ensures the script will run in the background allowing the Pi continue the rest of the booting process.
+Do not forget the "&" symbol. This ensures the script will run in the background allowing the rest of the Pi's booting process to continue.
 
 **Update paths in the scripts**
 
