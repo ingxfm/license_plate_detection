@@ -159,3 +159,6 @@ Do not forget the "&" symbol. This ensures the script will run in the background
 - In the script monitoring_vlm_calling_lpnr.sh: do Not change path.
 - In the script lpnr.py, in line 29: change this path to where you located the script.
 - In the script clean_var_lib_motion_dir.sh: do Not change path.
+
+
+Note: version with docker compose and message brokers?
