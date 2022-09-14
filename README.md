@@ -161,4 +161,4 @@ Do not forget the "&" symbol. This ensures the script will run in the background
 - In the script clean_var_lib_motion_dir.sh: do Not change path.
 
 
-Note: version with docker compose and message brokers?
+Note: version with docker compose and message brokers? Let's try this in Dockerhub.
