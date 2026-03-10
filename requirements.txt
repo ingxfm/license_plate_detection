@@ -1,0 +1,4 @@
+opencv-python==4.6.0.66        # OpenCV for image reading/processing
+numpy==1.25.2                   # Required by OpenCV and general arrays
+openalpr==2.7.103               # Python wrapper for OpenALPR (adjust if your OpenALPR version differs)
+mysql-connector-python==8.1.0   # MariaDB/MySQL database access
