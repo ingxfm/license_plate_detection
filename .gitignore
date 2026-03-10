@@ -1,0 +1,47 @@
+# Python standard
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+*.log
+*.sqlite3
+*.db
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+*.pydevproject
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Cursor IDE
+.cursor/
+.cursor_workspace/
+*.cursorproj
+*.cursor
+
+# Windsurf IDE
+.windsurf/
+*.wsproj
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
