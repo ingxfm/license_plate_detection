@@ -37,6 +37,14 @@ DB_CONFIG = {
     "port": "3306",
 }
 
+# Logging configuration
+# logging.basicConfig(filename='error_log.log', level = logging.DEBUG)
+logging.basicConfig(
+    filename="error_log.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
 def detect_license_plate():
     '''
     This function includes the detection of the license plate. Credits to `OpenAlpr <https://github.com/openalpr/openalpr>`_.
@@ -58,36 +66,40 @@ def detect_license_plate():
     #get result of the 'results' key
     #if empty, no plates detected        
     if diccionario['results']==[]:
-        print('No plates detected')
+        # print('No plates detected')
+        logging.info('No plates detected')
     #if populated, print plate number and detection confidence
     elif diccionario['results']!=[]:
         #-----------------------------------------------------------------
-        #for debugging purposes            
-        print(diccionario['results'][0]['plate'])
-        print(diccionario['results'][0]['confidence'])
-        print(current_date)
+        # #for debugging purposes            
+        # print(diccionario['results'][0]['plate'])
+        # print(diccionario['results'][0]['confidence'])
+        # print(current_date)
+        logging.info(diccionario['results'][0]['plate'])
+        logging.info(diccionario['results'][0]['confidence'])
+        logging.info(current_date)
         #-----------------------------------------------------------------
         plate = diccionario['results'][0]['plate']
         confidence = diccionario['results'][0]['confidence']
         # Unpack dictionary with ** and insert info into database
         connect_to_database = mysql.connector.connect(**DB_CONFIG)
         #-----------------------------------------------------------------
-        #for debugging purposes
-        #print(connect_to_database)
+        # #for debugging purposes
+        # print(connect_to_database)
         #-----------------------------------------------------------------
         cursor = connect_to_database.cursor()
         #-----------------------------------------------------------------
-        #for debugging purposes 
-        #print(cursor)            
-        #print(number)
+        # #for debugging purposes 
+        # print(cursor)            
+        # print(number)
         #-----------------------------------------------------------------
         #the format of the data for inserting it to database
         add_plate_info = ("INSERT INTO license_plates_detected "
           "(Plates, Confidence, Date) "
           "VALUES (%(Plates)s, %(Confidence)s, %(Date)s)")
         #-----------------------------------------------------------------
-        #for debugging purposes
-        #print(add_plate_info)
+        # #for debugging purposes
+        # print(add_plate_info)
         #-----------------------------------------------------------------
         #the data to be inserted to database
         data_plate_info = {
@@ -96,8 +108,8 @@ def detect_license_plate():
             'Date': current_date,
             }
         #-----------------------------------------------------------------
-        #for debugging purposes
-        #print(data_plate_info)
+        # #for debugging purposes
+        # print(data_plate_info)
         #-----------------------------------------------------------------
         #Insert the data
         cursor.execute(add_plate_info, data_plate_info)
@@ -168,43 +180,43 @@ def main():
     detect_license_plate()
     stop_time = t.time()
     dtt = stop_time - start_time
-    print('The detection time is', dtt)
+    # print('The detection time is', dtt)
+    logging.info(f'The detection time is {dtt}')
     stop_time_total = t.time()
     dtt_total = stop_time_total - start_time_total
-    print('The total script time is', dtt_total)
+    logging.info(f'The total script time is {dtt_total}')
+    # print('The total script time is', dtt_total)
     
 
 #live streaming from Motion, framerate 2 FPS
 #------------------------------------------------------------------------
-try:
-    t.sleep(0.1)
-    if __name__ == '__main__':
+if __name__ == '__main__':
+    try:
+        t.sleep(0.1)
         main()
+            
+    except ConnectionError:
+        exception_date = dt.now()
+        logging.error(
+            '\nConnectionError\n'
+            '1.Unable to get live feed. Verify the Motion project feed and connection.\n'
+            '2.Try entering "sudo service motion start" in the terminal.\n'
+            '3.In the terminal enter "sudo nano /etc/motion/motion.conf", for the configuration file.\n'
+            '4.For local host video feed aim to: "http://localhost:8081/".\n'
+            + str(exception_date) + '\n')
+        t.sleep(0.5)
         
-except ConnectionError:
-    logging.basicConfig(filename='error_log.log', level = logging.DEBUG)
-    exception_date = dt.now()
-    logging.debug(
-        '\nConnectionError\n'
-        '1.Unable to get live feed. Verify the Motion project feed and connection.\n'
-        '2.Try entering "sudo service motion start" in the terminal.\n'
-        '3.In the terminal enter "sudo nano /etc/motion/motion.conf", for the configuration file.\n'
-        '4.For local host video feed aim to: "http://localhost:8081/".\n'
-        + str(exception_date) + '\n')
-    t.sleep(0.5)
-    
-except OSError:    
-    logging.basicConfig(filename='error_log.log', level = logging.DEBUG)
-    exception_date = dt.now()
-    logging.debug(
-        '\nOSError:\n'
-        '1.Unable to get live feed. Verify the Motion project feed and connection.\n'
-        '2.Try entering "sudo service motion start" in the terminal.\n'
-        '3.In the terminal enter "sudo nano /etc/motion/motion.conf", for the configuration file.\n'
-        '4.For local host video feed aim to: "http://localhost:8081/".\n'
-        '5.Verify OpenAlpr detection function and/or service in terminal.\n'
-        + str(exception_date) + '\n')
-    t.sleep(0.5)
+    except OSError:
+        exception_date = dt.now()
+        logging.error(
+            '\nOSError:\n'
+            '1.Unable to get live feed. Verify the Motion project feed and connection.\n'
+            '2.Try entering "sudo service motion start" in the terminal.\n'
+            '3.In the terminal enter "sudo nano /etc/motion/motion.conf", for the configuration file.\n'
+            '4.For local host video feed aim to: "http://localhost:8081/".\n'
+            '5.Verify OpenAlpr detection function and/or service in terminal.\n'
+            + str(exception_date) + '\n')
+        t.sleep(0.5)
                 
 #------------------------------------------------------------------------
     
