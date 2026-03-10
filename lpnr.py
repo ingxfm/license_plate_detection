@@ -66,60 +66,33 @@ def detect_license_plate():
     #get result of the 'results' key
     #if empty, no plates detected        
     if diccionario['results']==[]:
-        # print('No plates detected')
         logging.info('No plates detected')
     #if populated, print plate number and detection confidence
     elif diccionario['results']!=[]:
-        #-----------------------------------------------------------------
-        # #for debugging purposes            
-        # print(diccionario['results'][0]['plate'])
-        # print(diccionario['results'][0]['confidence'])
-        # print(current_date)
         logging.info(diccionario['results'][0]['plate'])
         logging.info(diccionario['results'][0]['confidence'])
         logging.info(current_date)
         #-----------------------------------------------------------------
         plate = diccionario['results'][0]['plate']
-        confidence = diccionario['results'][0]['confidence']
-        # Unpack dictionary with ** and insert info into database
-        connect_to_database = mysql.connector.connect(**DB_CONFIG)
+        confidence = diccionario['results'][0]['confidence']        
         #-----------------------------------------------------------------
-        # #for debugging purposes
-        # print(connect_to_database)
-        #-----------------------------------------------------------------
-        cursor = connect_to_database.cursor()
-        #-----------------------------------------------------------------
-        # #for debugging purposes 
-        # print(cursor)            
-        # print(number)
-        #-----------------------------------------------------------------
-        #the format of the data for inserting it to database
-        add_plate_info = ("INSERT INTO license_plates_detected "
-          "(Plates, Confidence, Date) "
-          "VALUES (%(Plates)s, %(Confidence)s, %(Date)s)")
-        #-----------------------------------------------------------------
-        # #for debugging purposes
-        # print(add_plate_info)
-        #-----------------------------------------------------------------
-        #the data to be inserted to database
-        data_plate_info = {
-            'Plates': plate,
-            'Confidence': confidence,
-            'Date': current_date,
-            }
-        #-----------------------------------------------------------------
-        # #for debugging purposes
-        # print(data_plate_info)
-        #-----------------------------------------------------------------
-        #Insert the data
-        cursor.execute(add_plate_info, data_plate_info)
-        #Commit the insertion
-        connect_to_database.commit()
-        #Close cursor
-        cursor.close()
-        #close database
-        connect_to_database.close() 
-
+        with mysql.connector.connect(**DB_CONFIG) as conn:
+            # Cursor is also managed with 'with', so it will close automatically
+            with conn.cursor() as cursor:
+                #the format of the data for inserting it to database
+                add_plate_info = ("INSERT INTO license_plates_detected "
+                                  "(Plates, Confidence, Date) "
+                                  "VALUES (%(Plates)s, %(Confidence)s, %(Date)s)")
+                #the data to be inserted to database
+                data_plate_info = {
+                    'Plates': plate,
+                    'Confidence': confidence,
+                    'Date': current_date,
+                    }
+                #Insert the data
+                cursor.execute(add_plate_info, data_plate_info)
+                #Commit the insertion
+                conn.commit()
         
 def get_stream_from_localhost():
     '''
@@ -174,19 +147,17 @@ def main():
     print_stream_variables(returned_list)
     stop_time = t.time()
     dtt = stop_time - start_time
-    print('The time to get the image from the stream is', dtt)
+    logging.info(f'The time to get the image from the stream is {dtt}')
     #returned_imaged = print_stream_variables()
     start_time = t.time()
     detect_license_plate()
     stop_time = t.time()
     dtt = stop_time - start_time
-    # print('The detection time is', dtt)
     logging.info(f'The detection time is {dtt}')
     stop_time_total = t.time()
     dtt_total = stop_time_total - start_time_total
-    logging.info(f'The total script time is {dtt_total}')
-    # print('The total script time is', dtt_total)
-    
+    logging.info(f'The total script time is {dtt_total}')    
+
 
 #live streaming from Motion, framerate 2 FPS
 #------------------------------------------------------------------------
@@ -218,10 +189,7 @@ if __name__ == '__main__':
             + str(exception_date) + '\n')
         t.sleep(0.5)
                 
-#------------------------------------------------------------------------
-    
-            
-           
+#------------------------------------------------------------------------          
 #References:
 #1.https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
 #2.https://picamera.readthedocs.io/en/release-1.13/recipes2.html
