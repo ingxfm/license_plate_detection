@@ -1,6 +1,7 @@
 #Python Standard libraries
 from datetime import datetime as dt
 from urllib.request import urlopen
+import os
 import json
 import logging
 import subprocess
@@ -15,6 +16,26 @@ import numpy as np
 #Local libraries/application
 #None
 
+
+# ------------------------------------------------------------------
+# Environment configuration
+# ------------------------------------------------------------------
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+if DB_USER is None or DB_PASSWORD is None:
+    raise EnvironmentError(
+        "Environment variables DB_USER and DB_PASSWORD must be set"
+    )
+    
+DB_CONFIG = {
+    "user": DB_USER,
+    "password": DB_PASSWORD,
+    "database": "plates",
+    "host": "localhost",
+    "port": "3306",
+}
 
 def detect_license_plate():
     '''
@@ -48,9 +69,8 @@ def detect_license_plate():
         #-----------------------------------------------------------------
         plate = diccionario['results'][0]['plate']
         confidence = diccionario['results'][0]['confidence']
-        #insert info into database
-        connect_to_database = mysql.connector.connect(user='root', password='pi',
-                                                      database='plates', host='localhost', port='3306')
+        # Unpack dictionary with ** and insert info into database
+        connect_to_database = mysql.connector.connect(**DB_CONFIG)
         #-----------------------------------------------------------------
         #for debugging purposes
         #print(connect_to_database)
