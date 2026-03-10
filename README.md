@@ -20,7 +20,7 @@ sudo apt-get clean & autoremove
 Update your Pi with the following two commands:
 ```
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 ```
 The next command installs packages required for all the other steps:
 ```
@@ -114,7 +114,7 @@ Note: In case, you had installed the OpenCV-2.4.13, like in other tutorials, mod
 ```
 sudo nano OpenCVDetectCXXCompiler.cmake
 ```
-Then, add the following code into the file before the first “if NOT...”. This means, when you find that if NOT, just before it, press return to give some spaces to the following code, then copy and paste:
+Then, add the following code into the file before the first “if NOT...”. This means, when you find that "if NOT", just before it, press return to give some spaces to the following code, then copy and paste:
 ```
 #dumpversion prints only major version since gcc7
   if((NOT CMAKE_GCC_REGEX_VERSION) AND (${CMAKE_OPENCV_GCC_VERSION_FULL} GREATER 6))
